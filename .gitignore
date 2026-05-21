@@ -1,0 +1,7 @@
+prompts/unified_prompt.md
+prompts/master_context.md
+.env
+*.env
+__pycache__/
+*.pyc
+.venv/
