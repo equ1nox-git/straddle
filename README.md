@@ -19,7 +19,7 @@ If you run Ollama locally and use more than one client, Straddle solves the prob
 
 **Works with any OpenAI-compatible client.** Hermes WebUI, Siri shortcuts, curl, any SDK targeting `/v1/chat/completions`. Point them at Straddle instead of Ollama directly and they get prompt injection for free.
 
-**~120 lines of Python.** No Docker, no npm, no config files. Just FastAPI + Ollama.
+**~110 lines of Python.** No Docker, no npm, no config files. Just FastAPI + Ollama.
 
 ---
 
@@ -40,7 +40,7 @@ If you run Ollama locally and use more than one client, Straddle solves the prob
            │                               │
            │  + inject system_prompt.md    │
            │  + inject master_context.md   │
-           │  + fix num_ctx  keep_alive    │
+           │  + fix num_ctx + keep_alive    │
            └───────────────┬───────────────┘
                            │
                            ▼
@@ -87,6 +87,7 @@ All settings via environment variables or `.env`:
 | `NUM_CTX` | `8192` | Context window (fixed — prevents KV buffer resize) |
 | `KEEP_ALIVE` | `-1` | `-1` = keep model loaded forever, `0` = unload after each request |
 | `PROMPTS_DIR` | `./prompts` | Directory containing `system_prompt.md` and `master_context.md` |
+| `STRADDLE_URL` | `http://localhost:11435` | Straddle endpoint (used by `telegram_gateway.py`) |
 
 ---
 
