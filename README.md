@@ -14,7 +14,7 @@
 
 - **OpenAI API translation** — drop-in replacement endpoint at `:11435`; no client-side changes required
 - **Global prompt injection** — `system_prompt.md` + `master_context.md` prepended to every request automatically
-- **Streaming mesh** — full SSE streaming with proper `[DONE]` termination; compatible with Open WebUI, Siri, and any OpenAI SDK
+- **Streaming mesh** — full SSE streaming with proper `[DONE]` termination; compatible with Hermes WebUI, Siri, and any OpenAI SDK
 - **KV cache optimization** — `num_ctx: 8192` + `keep_alive: -1` keeps models hot in VRAM between requests
 - **Telegram gateway** — optional bot bridge routes messages through the same proxy stack
 
@@ -25,7 +25,7 @@
 ```
 ┌─────────────────────────────────────────────────────────┐
 │                     CLIENT LAYER                        │
-│   Open WebUI  │  Siri Shortcut  │  Telegram  │  curl   │
+│  Hermes WebUI │  Siri Shortcut  │  Telegram  │  curl   │
 └──────────┬────────────┬──────────────┬─────────────────┘
            │            │              │
            └────────────▼──────────────┘
