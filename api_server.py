@@ -6,6 +6,10 @@ import requests, uvicorn, json, time, uuid
 
 app = FastAPI()
 
+@app.get("/")
+async def health():
+    return {"status": "ok", "service": "straddle"}
+
 # Stable Ollama options — fixed num_ctx prevents buffer resize on skill load;
 # keep_alive=-1 keeps model warm between requests.
 OLLAMA_OPTIONS = {
