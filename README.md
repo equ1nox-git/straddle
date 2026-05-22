@@ -1,6 +1,6 @@
-# ⚡ Straddle
+# Straddle
 
-> A lightweight local AI proxy that bridges any OpenAI-compatible client to Ollama, injecting system prompts and streaming completions without touching client code.
+A local proxy gateway that routes OpenAI-compatible API requests to a local Ollama backend. Built to maintain uptime for frontends and messaging bots when primary models hit context limits.
 
 ![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)
 ![Python](https://img.shields.io/badge/python-3.10%2B-3776ab?style=flat-square&logo=python&logoColor=white)
@@ -10,72 +10,50 @@
 
 ---
 
-## Overview
-
-Straddle sits between your clients and Ollama. It translates OpenAI API calls, injects a persistent system prompt on every request, and handles streaming completions. No model switching required on the client side.
-
-Accessible locally at `http://localhost:11435` or over Tailscale at `http://b450.tail59fa06.ts.net:11435`.
-
----
-
 ## Features
 
-- **OpenAI-compatible API** at `:11435` — drop-in for any client that speaks OpenAI's schema
-- **Persistent prompt injection** — `system_prompt.md` and `master_context.md` prepended to every request
-- **Streaming completions** — full SSE with proper `[DONE]` termination, compatible with Hermes WebUI, Siri, and any OpenAI SDK
-- **KV cache tuning** — `num_ctx: 8192` and `keep_alive: -1` keep models resident in VRAM between requests
-- **Telegram gateway** — optional bot that routes messages through the same proxy
+- Translates OpenAI chat completions directly to local Ollama routes
+- Dynamic per-request system prompt injection
+- Full support for low-latency token streaming
+- Telegram bot gateway included
 
 ---
 
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                     CLIENT LAYER                        │
-│  Hermes WebUI │  Siri Shortcut  │  Telegram  │  curl   │
-└──────────┬────────────┬──────────────┬─────────────────┘
-           │            │              │
-           └────────────▼──────────────┘
-                        │
-              ┌─────────▼──────────┐
-              │   Straddle :11435  │  FastAPI proxy
-              │  POST /v1/chat/    │  + prompt injection
-              │  GET  /v1/models   │  + SSE streaming
-              └─────────┬──────────┘
-                        │
-              ┌─────────▼──────────┐
-              │   Ollama  :11434   │  Local inference
-              │  Vulkan compute    │  GPU-accelerated
-              │  ~30 tok/s output  │  29/29 layers
-              └────────────────────┘
+Client (Hermes WebUI / Telegram Bot)
+  -> Straddle Proxy (:11435)
+  -> Ollama Backend (:11434)
+  -> Vulkan Compute Layer
 ```
+
+Accessible locally at `http://localhost:11435` or over Tailscale at `http://b450.tail59fa06.ts.net:11435`.
+
+Hermes WebUI dashboard: `http://b450.tail59fa06.ts.net:3000`
 
 ---
 
 ## Setup
 
-**1. Clone and configure**
-```bash
-git clone https://github.com/equ1nox-git/straddle.git
-cd straddle
-cp .env.example .env
-# Edit .env and set TELEGRAM_BOT_TOKEN if using the bot
-```
+1. Configure environment:
+   ```bash
+   cp .env.example .env
+   # Set TELEGRAM_BOT_TOKEN if using the bot
+   ```
 
-**2. Install dependencies**
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-```
+2. Install dependencies:
+   ```bash
+   python3 -m venv .venv
+   source .venv/bin/activate
+   pip install -r requirements.txt
+   ```
 
-**3. Run**
-```bash
-python3 api_server.py
-# Listening at http://localhost:11435
-curl http://localhost:11435/v1/models
-```
+3. Run:
+   ```bash
+   python3 api_server.py
+   # Listening at http://localhost:11435
+   ```
 
 ---
 
@@ -83,6 +61,7 @@ curl http://localhost:11435/v1/models
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
+| `GET` | `/` | Health check |
 | `GET` | `/v1/models` | List models (OpenAI format) |
 | `GET` | `/api/tags` | List models (Ollama native) |
 | `POST` | `/v1/chat/completions` | Chat with system prompt injection |
@@ -91,27 +70,13 @@ Streaming: pass `"stream": true` in the request body.
 
 ---
 
-## Telegram Gateway
-
-```bash
-# Requires TELEGRAM_BOT_TOKEN in .env
-python3 telegram_gateway.py
-```
-
-Or via systemd:
-```bash
-systemctl --user enable --now straddle-bot.service
-```
-
----
-
 ## Configuration
 
 **Systemd services**
 ```bash
-systemctl --user enable --now straddle-api.service
-systemctl --user enable --now straddle-bot.service
-systemctl --user status straddle-api straddle-bot
+systemctl --user enable --now straddle-api.service    # proxy on :11435
+systemctl --user enable --now straddle-bot.service    # Telegram bot
+systemctl --user enable --now hermes-webui.service    # dashboard on :3000
 ```
 
 **Prompt files**
@@ -127,7 +92,7 @@ systemctl --user status straddle-api straddle-bot
 
 - Python 3.10+
 - [Ollama](https://ollama.ai) on `localhost:11434`
-- Vulkan-compatible GPU recommended for hardware-accelerated inference
+- Vulkan-compatible GPU recommended
 
 ---
 
