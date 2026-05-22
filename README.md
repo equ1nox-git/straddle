@@ -38,7 +38,7 @@
                         │
               ┌─────────▼──────────┐
               │   Ollama  :11434   │  Local inference
-              │  RX 5700 XT VRAM   │  Vulkan backend
+              │             VRAM   │  Vulkan backend
               │  ~30 tok/s output  │  8GB @ 29/29 layers
               └────────────────────┘
 ```
