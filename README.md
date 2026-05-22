@@ -26,9 +26,30 @@ If you run Ollama locally and use more than one client, Straddle solves the prob
 ## Architecture
 
 ```
-Hermes WebUI / Siri / Telegram / curl
-  → Straddle :11435   ← prompt injection + KV cache config
-  → Ollama   :11434   ← local inference
+┌─────────────────────────────────────────────────────┐
+│                    YOUR CLIENTS                     │
+│                                                     │
+│   Hermes WebUI    Siri Shortcut    Telegram    curl │
+└──────────┬───────────────┬──────────────┬──────────┘
+           │               │              │
+           └───────────────┴──────────────┘
+                           │
+                           ▼
+           ┌───────────────────────────────┐
+           │         STRADDLE :11435       │
+           │                               │
+           │  + inject system_prompt.md    │
+           │  + inject master_context.md   │
+           │  + fix num_ctx  keep_alive    │
+           └───────────────┬───────────────┘
+                           │
+                           ▼
+           ┌───────────────────────────────┐
+           │          OLLAMA :11434        │
+           │                               │
+           │   local inference             │
+           │   Vulkan compute              │
+           └───────────────────────────────┘
 ```
 
 ---
