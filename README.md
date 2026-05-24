@@ -1,6 +1,6 @@
 # Straddle
 
-A minimal Ollama bridge that gives every client — web UI, Siri shortcut, Telegram bot, any script — a single consistent inference endpoint with persistent system prompt injection and KV cache tuning.
+A minimal Ollama proxy that gives every client — web UI, Siri shortcut, any script — a single consistent inference endpoint with persistent system prompt injection and KV cache tuning.
 
 If you run Ollama locally and use more than one client, Straddle solves the problem of configuring each one separately.
 
@@ -29,7 +29,7 @@ If you run Ollama locally and use more than one client, Straddle solves the prob
 ┌─────────────────────────────────────────────────────┐
 │                    YOUR CLIENTS                     │
 │                                                     │
-│   Hermes WebUI    Siri Shortcut    Telegram    curl │
+│       Hermes WebUI      Siri Shortcut      curl    │
 └──────────┬───────────────┬──────────────┬──────────┘
            │               │              │
            └───────────────┴──────────────┘
@@ -87,7 +87,6 @@ All settings via environment variables or `.env`:
 | `NUM_CTX` | `8192` | Context window (fixed — prevents KV buffer resize) |
 | `KEEP_ALIVE` | `-1` | `-1` = keep model loaded forever, `0` = unload after each request |
 | `PROMPTS_DIR` | `./prompts` | Directory containing `system_prompt.md` and `master_context.md` |
-| `STRADDLE_URL` | `http://localhost:11435` | Straddle endpoint (used by `telegram_gateway.py`) |
 
 ---
 
