@@ -102,7 +102,29 @@ def get_upcoming_events(days=7, calendar_name=None):
     results.sort(key=lambda x: x.get("start", ""))
     return results
 
+MAC_REMINDERS_CACHE = "/tmp/reminders_mac.json"
+MAC_CACHE_MAX_AGE   = 600  # 10 min
+
+def _read_mac_cache(list_name=None, completed=False):
+    import json, time, os
+    if not os.path.exists(MAC_REMINDERS_CACHE):
+        return None
+    if time.time() - os.path.getmtime(MAC_REMINDERS_CACHE) > MAC_CACHE_MAX_AGE:
+        return None
+    try:
+        data = json.loads(open(MAC_REMINDERS_CACHE).read())
+        if list_name:
+            data = [r for r in data if list_name.lower() in r.get("list","").lower()]
+        return data
+    except Exception:
+        return None
+
 def get_reminders(completed=False, list_name=None):
+    # Try MacBook osascript cache first (more up-to-date than CalDAV)
+    cached = _read_mac_cache(list_name=list_name, completed=completed)
+    if cached is not None:
+        return cached
+
     import requests as req
     from requests.auth import HTTPBasicAuth
     from xml.etree import ElementTree as ET
@@ -113,8 +135,6 @@ def get_reminders(completed=False, list_name=None):
 
     for cal in calendars:
         name = cal.get_display_name()
-        if "reminder" not in name.lower():
-            continue
         if list_name and list_name.lower() not in name.lower():
             continue
         try:
