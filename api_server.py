@@ -1,16 +1,26 @@
 #!/usr/bin/env python3
 import os, subprocess, re
 from pathlib import Path
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException, Security
 from fastapi.responses import StreamingResponse
+from fastapi.security import APIKeyHeader
 from pydantic import BaseModel
 import requests, uvicorn, json, time, uuid
+from fastapi import Depends
 
 app = FastAPI()
 
 OLLAMA_URL    = os.environ.get("OLLAMA_URL",   "http://localhost:11434")
-HOST          = os.environ.get("STRADDLE_HOST", "0.0.0.0")
+HOST          = os.environ.get("STRADDLE_HOST", "100.118.201.46")
 PORT          = int(os.environ.get("STRADDLE_PORT", 11435))
+API_KEY       = os.environ.get("STRADDLE_API_KEY", "")
+
+_api_key_header = APIKeyHeader(name="X-API-Key", auto_error=False)
+
+async def verify_api_key(key: str = Security(_api_key_header)):
+    if API_KEY and key != API_KEY:
+        raise HTTPException(status_code=401, detail="Invalid API key")
+    return key
 PROMPTS_DIR   = Path(os.environ.get("PROMPTS_DIR", Path(__file__).parent / "prompts"))
 DEFAULT_MODEL = os.environ.get("DEFAULT_MODEL", "")
 HIMALAYA      = os.path.expanduser("~/.local/bin/himalaya")
@@ -181,13 +191,13 @@ def inject_into_messages(messages: list) -> list:
             break
     return msgs
 
-@app.get("/v1/models")
+@app.get("/v1/models", dependencies=[Depends(verify_api_key)])
 async def list_models_openai():
     res = requests.get(f"{OLLAMA_URL}/api/tags").json()
     models = [{"id": m["name"], "object": "model", "owned_by": "ollama"} for m in res.get("models", [])]
     return {"object": "list", "data": models}
 
-@app.get("/api/tags")
+@app.get("/api/tags", dependencies=[Depends(verify_api_key)])
 async def list_models():
     return requests.get(f"{OLLAMA_URL}/api/tags").json()
 
@@ -242,7 +252,7 @@ def stream_ollama(model: str, messages: list, ctx: str, tools: list = []):
                 yield "data: [DONE]\n\n"
                 return
 
-@app.post("/v1/chat/completions")
+@app.post("/v1/chat/completions", dependencies=[Depends(verify_api_key)])
 async def chat(request: ChatRequest):
     ctx = get_context()
     messages = inject_into_messages(request.messages)
