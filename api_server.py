@@ -14,6 +14,9 @@ OLLAMA_URL    = os.environ.get("OLLAMA_URL",   "http://localhost:11434")
 HOST          = os.environ.get("STRADDLE_HOST", "100.118.201.46")
 PORT          = int(os.environ.get("STRADDLE_PORT", 11435))
 API_KEY       = os.environ.get("STRADDLE_API_KEY", "")
+ICLOUD_EMAIL  = os.environ.get("ICLOUD_EMAIL",  "")
+GMAIL_EMAIL   = os.environ.get("GMAIL_EMAIL",   "")
+YAHOO_EMAIL   = os.environ.get("YAHOO_EMAIL",   "")
 
 _api_key_header = APIKeyHeader(name="X-API-Key", auto_error=False)
 
@@ -90,11 +93,11 @@ def inject_data(last_user_msg: str) -> str | None:
         intent = _parse_send_intent(last_user_msg)
         if intent:
             account_emails = {
-                "icloud": "tom.mb99@icloud.com",
-                "gmail":  "tmb129129@gmail.com",
-                "yahoo":  "tmb199922@yahoo.com",
+                "icloud": ICLOUD_EMAIL,
+                "gmail":  GMAIL_EMAIL,
+                "yahoo":  YAHOO_EMAIL,
             }
-            from_addr = account_emails.get(intent["account"], "tom.mb99@icloud.com")
+            from_addr = account_emails.get(intent["account"], ICLOUD_EMAIL)
             mime = "\n".join([
                 f"From: {from_addr}",
                 f"To: {intent['to']}",
