@@ -6,3 +6,4 @@ prompts/master_context.md
 __pycache__/
 *.pyc
 .venv/
+telegram_gateway.py
