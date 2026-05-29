@@ -7,6 +7,12 @@
 
 An OpenAI-compatible inference gateway for self-hosted Ollama. Single endpoint for all clients, persistent system prompt injection, live data context (email, calendar), and API key authentication.
 
+## Why I built this
+
+I run Open WebUI, custom scripts, and various API clients — all pointing at Ollama on a local server. Each client needed its own configuration, system prompt, and endpoint. When I updated the system prompt I had to update it everywhere. When I wanted to add email context to responses, every client needed separate integration.
+
+Straddle solves that by sitting between every client and Ollama: one address, one system prompt to edit, one place to add context enrichment. All clients get the same behavior without any per-client config.
+
 ---
 
 ## Features
